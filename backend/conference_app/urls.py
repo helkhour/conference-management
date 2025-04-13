@@ -16,10 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from rest_framework.routers import DefaultRouter
 from conferences.views import ConferenceViewSet
 from doctors.views import DoctorViewSet
 from costs.views import CostViewSet
+
+
+def homepage(request):
+    return JsonResponse({
+        'message': 'Welcome to the Conference Management API',
+        'endpoints': {
+            'conferences': '/api/conferences/',
+            'doctors': '/api/doctors/',
+            'costs': '/api/costs/',
+        }
+    })
 
 # Create a router and register viewsets
 router = DefaultRouter()
@@ -28,6 +40,11 @@ router.register(r'doctors', DoctorViewSet, basename='doctors')
 router.register(r'costs', CostViewSet, basename='costs')
 
 urlpatterns = [
+    path('', homepage, name='homepage'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),  # All API endpoints under /api/
 ]
+
+
+
+
