@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { archiveConference } from '../../services/conferenceService';
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 function ConferenceDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [conference, setConference] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   useEffect(() => {
     api.get(`conferences/${id}/`)
@@ -20,6 +34,17 @@ function ConferenceDetail() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleArchive = () => {
+    archiveConference(id)
+      .then(() => {
+        navigate('/conferences');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    setArchiveOpen(false);
+  };
 
   if (loading) return <LoadingSpinner />;
   if (!conference) return <Typography>Conference not found</Typography>;
@@ -41,7 +66,15 @@ function ConferenceDetail() {
             <ListItem key={doc.id}>
               <ListItemText
                 primary={`${doc.first_name} ${doc.last_name}`}
-                secondary={doc.specialty}
+                secondary={
+                  <>
+                    <Typography component="span">{doc.specialty}</Typography>
+                    <br />
+                    <Typography component="span">
+                      Cost: {doc.cost != null ? `$${parseFloat(doc.cost).toFixed(2)}` : 'None'}
+                    </Typography>
+                  </>
+                }
               />
             </ListItem>
           ))}
@@ -49,6 +82,27 @@ function ConferenceDetail() {
       ) : (
         <Typography>No doctors assigned</Typography>
       )}
+      <Box sx={{ mt: 3 }}>
+        <Button
+          variant="contained"
+          className="custom-button"
+          onClick={() => setArchiveOpen(true)}
+        >
+          Archive Conference
+        </Button>
+      </Box>
+      <Dialog open={archiveOpen} onClose={() => setArchiveOpen(false)}>
+        <DialogTitle>Confirm Archive</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to archive {conference.title}? It will no longer appear in active lists.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setArchiveOpen(false)}>Cancel</Button>
+          <Button onClick={handleArchive} className="custom-button">Archive</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

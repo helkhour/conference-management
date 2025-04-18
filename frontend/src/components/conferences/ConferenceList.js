@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getConferences, archiveConference } from '../../services/conferenceService';
-import { Box, Card, CardContent, Typography, Button, Grid } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, Chip } from '@mui/material';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { Link } from 'react-router-dom';
 
@@ -45,26 +45,39 @@ function ConferenceList() {
                   {conf.start_date} to {conf.end_date}
                 </Typography>
                 <Typography>{conf.location}, {conf.destination}</Typography>
-                <Typography color="textSecondary">{conf.description}</Typography>
+                <Typography color="textSecondary">{conf.description || 'No description'}</Typography>
                 <Typography>
                   Doctors: {conf.invited_doctors.length || 'None'}
                 </Typography>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to={`/conferences/edit/${conf.id}`}
-                  className="custom-button"
-                  sx={{ mt: 2, mr: 1 }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => handleArchive(conf.id)}
-                  sx={{ mt: 2 }}
-                >
-                  Archive
-                </Button>
+                {conf.is_archived && (
+                  <Chip label="Archived" size="small" sx={{ mt: 1 }} />
+                )}
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    className="custom-button"
+                    component={Link}
+                    to={`/conferences/view/${conf.id}`}
+                    sx={{ mr: 1 }}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="contained"
+                    className="custom-button"
+                    component={Link}
+                    to={`/conferences/edit/${conf.id}`}
+                    sx={{ mr: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleArchive(conf.id)}
+                  >
+                    Archive
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
